@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#F4502B" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="description" content="Most Likely To - Impostor Edition. A pass-and-play party game for families and friends." />
+<title>Most Likely To — Impostor Edition</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ==========================================================
+   BASE
+   ========================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: "Poppins", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 600;
+  color: #fff;
+  background: #F4502B;
+  background-image: linear-gradient(178deg, #FFA23C 0%, #FB6B28 38%, #F03B29 70%, #DC1F32 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding: max(14px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none;
+}
+
+input { -webkit-user-select: text; user-select: text; }
+
+.app { width: 100%; max-width: 460px; display: flex; flex-direction: column; }
+
+.screen { display: none; flex: 1; flex-direction: column; animation: pop .34s cubic-bezier(.2,.9,.3,1); }
+.screen.active { display: flex; }
+@keyframes pop { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: none; } }
+
+/* ==========================================================
+   TYPE
+   ========================================================== */
+h1.title {
+  font-size: clamp(38px, 12vw, 54px);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+  text-align: center;
+  text-shadow: 0 4px 16px rgba(120, 20, 0, 0.28);
+}
+
+.tagline {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.screen-title {
+  font-size: clamp(26px, 7.5vw, 34px);
+  font-weight: 800; line-height: 1.1;
+  letter-spacing: -0.025em;
+  text-align: center;
+  text-shadow: 0 3px 12px rgba(120, 20, 0, 0.25);
+  word-break: break-word;
+}
+.screen-title small {
+  display: block;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 6px;
+}
+
+.sub { text-align: center; font-size: 14px; font-weight: 500; line-height: 1.5; color: rgba(255,255,255,.88); }
+
+/* ==========================================================
+   WHITE SHEETS
+   ========================================================== */
+.sheet {
+  background: #fff;
+  color: #191426;
+  border-radius: 26px;
+  padding: 18px 16px;
+  box-shadow: 0 12px 30px rgba(130, 25, 10, 0.22);
+}
+
+.sheet h3 {
+  font-size: 12px; font-weight: 800;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: #9A94A8;
+  margin-bottom: 12px;
+}
+
+/* ==========================================================
+   BUTTONS  (chunky, game-style)
+   ========================================================== */
+.btn {
+  display: block; width: 100%;
+  border: none; cursor: pointer;
+  font-family: inherit;
+  font-size: 17px; font-weight: 800;
+  letter-spacing: 0.01em;
+  padding: 16px 18px;
+  border-radius: 20px;
+  transition: transform .1s ease, box-shadow .1s ease, opacity .18s ease;
+}
+
+.btn.primary {
+  background: linear-gradient(180deg, #FFDD55 0%, #FFB01F 100%);
+  color: #4A2A00;
+  box-shadow: 0 6px 0 #D18400, 0 12px 22px rgba(90, 20, 0, 0.28);
+}
+.btn.primary:active { transform: translateY(4px); box-shadow: 0 2px 0 #D18400, 0 6px 12px rgba(90,20,0,.24); }
+
+.btn.light {
+  background: #fff; color: #23182F;
+  box-shadow: 0 6px 0 rgba(150, 40, 20, 0.28), 0 10px 20px rgba(90, 20, 0, 0.2);
+}
+.btn.light:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(150,40,20,.28); }
+
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.42);
+  box-shadow: none;
+  font-weight: 700;
+}
+.btn.ghost:active { transform: scale(.975); }
+
+.btn.sm { font-size: 14px; padding: 13px 14px; border-radius: 16px; }
+
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+.row { display: flex; gap: 10px; }
+.row .btn { flex: 1; white-space: nowrap; }
+
+/* ==========================================================
+   TOP BAR
+   ========================================================== */
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+
+.round {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border: none; cursor: pointer;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-family: inherit; font-size: 18px; font-weight: 800;
+  transition: background .16s, transform .1s;
+}
+.round:active { transform: scale(.9); background: rgba(255,255,255,.32); }
+
+.counter {
+  font-size: 14px; font-weight: 800;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.18);
+  padding: 7px 16px; border-radius: 99px;
+}
+
+/* ==========================================================
+   PLAYER INPUTS
+   ========================================================== */
+.plist { display: flex; flex-direction: column; gap: 9px; }
+.prow { display: flex; align-items: center; gap: 9px; }
+
+.pdot {
+  width: 34px; height: 34px; flex: 0 0 34px;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  font-size: 15px; font-weight: 800; color: #fff;
+}
+
+.prow input {
+  flex: 1; min-width: 0;
+  font-family: inherit; font-size: 16px; font-weight: 700;
+  color: #191426;
+  padding: 12px 14px;
+  background: #F3F1F7;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  outline: none;
+  transition: border-color .16s, background .16s;
+}
+.prow input::placeholder { color: #B4AEC0; font-weight: 600; }
+.prow input:focus { border-color: #FB6B28; background: #fff; }
+
+.pkill {
+  width: 32px; height: 32px; flex: 0 0 32px;
+  border: none; border-radius: 11px;
+  background: #F3F1F7; color: #A79FB5;
+  font-family: inherit; font-size: 18px; font-weight: 800;
+  cursor: pointer; transition: background .16s, color .16s, opacity .16s;
+}
+.pkill:active { background: #FFE3E0; color: #E04A38; }
+.pkill:disabled { opacity: .3; }
+
+.add-btn {
+  width: 100%; margin-top: 11px;
+  padding: 12px; border-radius: 14px;
+  border: 2px dashed #DCD7E4;
+  background: #fff; color: #7C7490;
+  font-family: inherit; font-size: 14.5px; font-weight: 800;
+  cursor: pointer; transition: border-color .16s, color .16s;
+}
+.add-btn:active { border-color: #FB6B28; color: #FB6B28; }
+
+/* ==========================================================
+   IMPOSTOR PICKER
+   ========================================================== */
+.seg { display: flex; gap: 9px; }
+.seg button {
+  flex: 1; padding: 13px 6px 11px;
+  border: 2px solid #EEEBF3; background: #F8F7FB;
+  border-radius: 16px; cursor: pointer;
+  font-family: inherit; color: #8B8399;
+  transition: all .18s cubic-bezier(.2,.9,.3,1);
+}
+.seg button .n { display: block; font-size: 21px; font-weight: 900; line-height: 1; }
+.seg button .l { display: block; margin-top: 3px; font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.seg button.on {
+  background: linear-gradient(180deg, #FB6B28, #E8262C);
+  border-color: #E8262C; color: #fff;
+  box-shadow: 0 5px 14px rgba(232, 38, 44, .38);
+  transform: translateY(-2px);
+}
+.seg button:disabled { opacity: .34; }
+
+.note { margin-top: 11px; font-size: 12.5px; font-weight: 600; line-height: 1.45; text-align: center; color: #8B8399; min-height: 18px; }
+.note.bad { color: #E8262C; }
+
+/* ==========================================================
+   THE CARD
+   ========================================================== */
+#screen-pass { justify-content: center; }
+
+.stage {
+  position: relative;
+  flex: 0 1 auto;
+  height: 56vh;
+  min-height: 290px;
+  max-height: 480px;
+  margin: 14px 0 18px;
+  border-radius: 30px;
+}
+
+/* what's underneath */
+.secret {
+  position: absolute; inset: 0;
+  background: #fff;
+  border-radius: 30px;
+  padding: 26px 22px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(130, 25, 10, 0.22);
+  opacity: 0; transform: scale(.96);
+  transition: opacity .07s linear, transform .07s linear;
+  pointer-events: none;
+}
+.stage.open .secret {
+  opacity: 1; transform: scale(1);
+  transition: opacity .18s ease, transform .26s cubic-bezier(.2,1.1,.3,1);
+}
+.secret .lbl {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: #B0A9BE;
+}
+.secret .q {
+  font-size: clamp(21px, 5.9vw, 27px);
+  font-weight: 800; line-height: 1.28;
+  letter-spacing: -0.02em;
+  color: #191426;
+  text-wrap: balance;
+}
+.secret .foot { font-size: 12px; font-weight: 600; color: #B0A9BE; }
+
+/* the lid */
+.cover {
+  position: absolute; inset: 0;
+  border-radius: 30px;
+  padding: 24px 20px 64px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px;
+  text-align: center;
+  cursor: grab;
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(90, 15, 5, 0.34), inset 0 2px 0 rgba(255,255,255,.28);
+  will-change: transform;
+  transition: transform .28s cubic-bezier(.18,.92,.28,1), opacity .2s ease;
+  touch-action: none;
+  overflow: hidden;
+}
+.cover::after {                                   /* soft gloss */
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(120% 70% at 50% -10%, rgba(255,255,255,.3), transparent 62%);
+  pointer-events: none;
+}
+.cover.dragging { transition: none; cursor: grabbing; }
+.stage.open .cover { opacity: 0; }
+
+.cover .face {
+  width: 92px; height: 92px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 40px; font-weight: 900;
+  background: rgba(255, 255, 255, 0.22);
+  border: 3px solid rgba(255, 255, 255, 0.45);
+  text-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.cover .cname {
+  font-size: clamp(24px, 7vw, 32px);
+  font-weight: 900; letter-spacing: -0.025em;
+  word-break: break-word; line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0,0,0,.22);
+}
+.swipe {
+  position: absolute; left: 0; right: 0; bottom: 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.swipe .arw { font-size: 24px; line-height: 1; animation: bob 1.6s ease-in-out infinite; }
+.swipe .txt { font-size: 14px; font-weight: 800; letter-spacing: .02em; color: rgba(255,255,255,.95); }
+@keyframes bob { 0%,100% { transform: translateY(2px); opacity: .7; } 50% { transform: translateY(-7px); opacity: 1; } }
+
+/* ==========================================================
+   REVEAL
+   ========================================================== */
+.big-sheet {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  text-align: center;
+  padding: 30px 22px;
+}
+.big-sheet .q {
+  font-size: clamp(23px, 6.6vw, 30px);
+  font-weight: 800; line-height: 1.24;
+  letter-spacing: -0.022em;
+  color: #191426;
+  text-wrap: balance;
+}
+#screen-reveal, #screen-result, #screen-vote { justify-content: center; }
+#screen-reveal .big-sheet, #screen-result .big-sheet { flex: 0 1 auto; padding: 26px 22px; }
+
+.big-sheet .lbl {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .17em; text-transform: uppercase;
+  color: #B0A9BE;
+}
+.big-sheet .why { font-size: 14px; font-weight: 600; line-height: 1.5; color: #6E6681; }
+
+.chip {
+  display: inline-block;
+  padding: 8px 18px; border-radius: 99px;
+  font-size: 12.5px; font-weight: 800;
+  letter-spacing: .06em; text-transform: uppercase;
+  background: linear-gradient(180deg, #FB6B28, #E8262C);
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(232, 38, 44, .32);
+}
+
+.spoiler {
+  background: #fff; border-radius: 20px;
+  padding: 14px 16px; text-align: center;
+  box-shadow: 0 8px 20px rgba(130, 25, 10, 0.18);
+}
+.spoiler .lbl {
+  display: block; margin-bottom: 5px;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: .17em; text-transform: uppercase;
+  color: #B0A9BE;
+}
+.spoiler .val { font-size: 16px; font-weight: 700; line-height: 1.4; color: #191426; }
+.spoiler .val.hot { font-size: 20px; font-weight: 900; color: #E8262C; }
+
+/* ==========================================================
+   VOTING
+   ========================================================== */
+.vote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.vote-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 12px;
+  border: none; border-radius: 18px;
+  background: #fff; color: #191426;
+  font-family: inherit; font-size: 15.5px; font-weight: 800;
+  text-align: left; cursor: pointer;
+  box-shadow: 0 5px 0 rgba(150, 40, 20, 0.24), 0 8px 18px rgba(90, 20, 0, 0.16);
+  transition: transform .1s ease, box-shadow .1s ease, opacity .2s ease;
+  min-width: 0;
+}
+.vote-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(150, 40, 20, 0.24); }
+.vote-btn .av {
+  width: 32px; height: 32px; flex: 0 0 32px;
+  border-radius: 11px;
+  display: grid; place-items: center;
+  color: #fff; font-size: 14px; font-weight: 800;
+}
+.vote-btn .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.msg {
+  border-radius: 20px; padding: 14px 16px;
+  text-align: center; background: #fff;
+  font-size: 16px; font-weight: 800; line-height: 1.4;
+  box-shadow: 0 8px 20px rgba(130, 25, 10, 0.18);
+  margin-bottom: 12px;
+}
+.msg.wrong { color: #E8262C; }
+.msg.right { color: #0E9E6E; }
+
+.banner {
+  font-size: clamp(30px, 9.5vw, 44px);
+  font-weight: 900; line-height: 1;
+  letter-spacing: -0.035em;
+}
+.banner.win  { color: #0E9E6E; }
+.banner.lose { color: #E8262C; }
+.banner.flat { color: #191426; }
+
+/* ==========================================================
+   HELP MODAL
+   ========================================================== */
+.modal {
+  position: fixed; inset: 0; z-index: 50;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 22px;
+  background: rgba(60, 10, 5, 0.55);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.modal.open { display: flex; animation: pop .22s ease; }
+.modal .box { width: 100%; max-width: 400px; max-height: 84vh; overflow-y: auto; }
+.modal ol { margin: 0 0 16px 18px; }
+.modal li { font-size: 14.5px; font-weight: 600; line-height: 1.55; color: #4A4358; margin-bottom: 9px; }
+.modal li b { color: #191426; font-weight: 800; }
+
+.foot-note { margin-top: 12px; text-align: center; font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,.62); }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- =========================== SETUP =========================== -->
+<section class="screen active" id="screen-setup">
+  <div style="padding: 14px 0 20px;">
+    <h1 class="title">MOST<br>LIKELY TO</h1>
+    <p class="tagline">Impostor Edition</p>
+  </div>
+
+  <div class="sheet">
+    <h3>Who's playing?</h3>
+    <div class="plist" id="playerList"></div>
+    <button class="add-btn" id="addPlayer">+ Add player</button>
+  </div>
+
+  <div class="sheet" style="margin-top:13px;">
+    <h3>How many impostors?</h3>
+    <div class="seg" id="impostorSeg">
+      <button data-n="1"><span class="n">1</span><span class="l">Impostor</span></button>
+      <button data-n="2"><span class="n">2</span><span class="l">Impostors</span></button>
+      <button data-n="3"><span class="n">3</span><span class="l">Impostors</span></button>
+    </div>
+    <p class="note" id="setupNote"></p>
+  </div>
+
+  <div style="margin-top:15px;">
+    <button class="btn primary" id="startBtn">START GAME</button>
+  </div>
+  <button class="btn ghost sm" id="howBtn" style="margin-top:10px;">How to play</button>
+
+  <p class="foot-note">Pass one phone around · 3+ players</p>
+</section>
+
+<!-- ======================== PASS &amp; PEEK ======================== -->
+<section class="screen" id="screen-pass">
+  <div class="topbar">
+    <button class="round" id="quitBtn" aria-label="Back to setup">&#10005;</button>
+    <span class="counter" id="counter">1 / 4</span>
+    <button class="round" id="helpBtn2" aria-label="How to play">?</button>
+  </div>
+
+  <h2 class="screen-title"><small>Pass the phone to</small><span id="passName">—</span></h2>
+
+  <div class="stage" id="stage">
+    <div class="secret">
+      <span class="lbl">Your question</span>
+      <p class="q" id="secretQ">—</p>
+      <span class="foot">Remember your answer. Don't say it out loud.</span>
+    </div>
+
+    <div class="cover" id="cover">
+      <div class="face" id="coverFace">A</div>
+      <div class="cname" id="coverName">—</div>
+      <div class="swipe"><span class="arw">&#8593;</span><span class="txt">Swipe up</span></div>
+    </div>
+  </div>
+
+  <button class="btn primary" id="nextPlayerBtn" disabled>NEXT PLAYER</button>
+</section>
+
+<!-- ========================== READY GATE ======================== -->
+<section class="screen" id="screen-ready">
+  <div class="sheet big-sheet">
+    <span class="lbl">Everyone has seen a question</span>
+    <p class="q">Has everyone written down their answers?</p>
+    <p class="why">No peeking. No changing your mind. There's no going back after this.</p>
+  </div>
+  <button class="btn primary" id="revealBtn" style="margin-top:14px;">EVERYONE'S READY</button>
+</section>
+
+<!-- ============================ REVEAL ========================== -->
+<section class="screen" id="screen-reveal">
+  <div class="sheet big-sheet">
+    <span class="lbl">Nobody finds out anything yet</span>
+    <p class="q">Go around the room.</p>
+    <span class="chip" id="impChip">1 impostor among you</span>
+    <p class="why" id="defenseWhy">Say the name you wrote down and <strong>why</strong> you picked them. Do not read your question out loud.</p>
+  </div>
+
+  <button class="btn primary" id="toVoteBtn" style="margin-top:14px;">START THE VOTE</button>
+  <button class="btn ghost sm" id="skipVoteBtn" style="margin-top:10px;">Skip the vote &amp; reveal</button>
+</section>
+
+<!-- ============================ VOTING ========================== -->
+<section class="screen" id="screen-vote">
+  <div class="topbar">
+    <button class="round" id="voteQuit" aria-label="Back to setup">&#10005;</button>
+    <span class="counter" id="voteLeft">1 impostor left</span>
+    <button class="round" id="helpBtn3" aria-label="How to play">?</button>
+  </div>
+
+  <h2 class="screen-title"><small>Time to vote</small>Who's the impostor?</h2>
+
+  <div style="margin-top:16px;">
+    <div class="msg" id="voteMsg" style="display:none;"></div>
+    <div class="vote-grid" id="voteGrid"></div>
+    <p class="sub" id="voteHint" style="margin-top:14px;">Talk it out as a group, then tap a name.</p>
+  </div>
+</section>
+
+<!-- ============================ RESULT ========================== -->
+<section class="screen" id="screen-result">
+  <div class="sheet big-sheet">
+    <div class="banner" id="resultBanner">CREW WINS</div>
+    <p class="why" id="resultLine">—</p>
+  </div>
+
+  <div id="resultFacts" style="display:flex; flex-direction:column; gap:10px; margin-top:12px;"></div>
+
+  <div class="row" style="margin-top:14px;">
+    <button class="btn primary" id="playAgainBtn">PLAY AGAIN</button>
+    <button class="btn light sm" id="editPlayersBtn" style="flex:0 0 36%;">Players</button>
+  </div>
+</section>
+
+</div>
+
+<!-- ============================ MODAL =========================== -->
+<div class="modal" id="howModal">
+  <div class="sheet box">
+    <h3>How to play</h3>
+    <ol>
+      <li>Everyone gets the <b>same question</b> on the phone — except the impostors, who secretly get a <b>totally different one</b>.</li>
+      <li>Each player holds the card to peek, then <b>writes down the name</b> of whoever fits their question best.</li>
+      <li>Nobody knows if they're the impostor. Everyone thinks their question is the real one — and it stays that way.</li>
+      <li>Go around the room. Say the name you wrote down and <b>why</b> — but never read your question out loud.</li>
+      <li>The impostors aren't lying, they're answering honestly. That's what makes them sound so strange.</li>
+      <li>Then <b>vote</b>. Name an impostor and they're caught. Name an innocent and they're <b>out of the game</b> — and you guess again from whoever's left.</li>
+      <li>Catch every impostor and the <b>crew wins</b>. Eject too many innocents and the <b>impostors win</b>.</li>
+      <li>Only then are <b>both questions revealed</b> — including the one the impostor was innocently answering the whole time.</li>
+    </ol>
+    <button class="btn primary" id="closeHow">Got it</button>
+  </div>
+</div>
+
+<script>
+/* ==================================================================
+   QUESTION BANKS
+   Two fully independent pools. Each round draws one from each, at
+   random, so crewmate and impostor prompts never lock into fixed
+   pairs — there is nothing to memorise.
+   ================================================================== */
+
+const CREWMATE_QUESTIONS = [
+  "Who's most likely to fall asleep during the movie they picked?",
+  "Who's most likely to reply “k” and start a war?",
+  "Who's most likely to cry at a dog commercial?",
+  "Who's most likely to lose their phone while holding it?",
+  "Who's most likely to eat cereal for dinner?",
+  "Who's most likely to be late to their own birthday?",
+  "Who's most likely to argue with a self-checkout machine?",
+  "Who's most likely to talk through the entire movie?",
+  "Who's most likely to overpack for one night away?",
+  "Who's most likely to take the last slice?",
+  "Who's most likely to have 400 unread texts?",
+  "Who's most likely to say “trust me” right before disaster?",
+  "Who's most likely to get lost with the GPS on?",
+  "Who's most likely to burn toast twice in a row?",
+  "Who's most likely to start a war over the thermostat?",
+  "Who's most likely to laugh at their own joke first?",
+  "Who's most likely to buy something they already own?",
+  "Who's most likely to nap for six hours?",
+  "Who's most likely to survive entirely on snacks?",
+  "Who's most likely to bring up a fight from years ago?",
+  "Who's most likely to break the printer forever?",
+  "Who's most likely to hide snacks from the family?",
+  "Who's most likely to sing the wrong lyrics with confidence?",
+  "Who's most likely to fake a phone call to escape?",
+  "Who's most likely to say “I'm not hungry” then eat yours?",
+  "Who's most likely to keep a dead plant for months?",
+  "Who's most likely to leave one sheet of toilet paper?",
+  "Who's most likely to text the wrong group chat?",
+  "Who's most likely to panic over a burnt dinner?",
+  "Who's most likely to take a selfie before coming inside?",
+  "Who's most likely to give a two-minute yes-or-no answer?",
+  "Who's most likely to fall for the same prank twice?",
+  "Who's most likely to spend an hour picking a show?",
+  "Who's most likely to insist they know a shortcut?",
+  "Who's most likely to hoard sauce packets?",
+  "Who's most likely to say “I told you so” with joy?",
+  "Who's most likely to leave dishes to soak for a week?",
+  "Who's most likely to double-text within a minute?",
+  "Who's most likely to be defeated by a jar lid?",
+  "Who's most likely to yell at a video game?",
+  "Who's most likely to forget why they walked in?",
+  "Who's most likely to sob at a wedding video?",
+  "Who's most likely to buy a gadget and never use it?",
+  "Who's most likely to trip over absolutely nothing?",
+  "Who's most likely to lecture everyone about recycling?",
+  "Who's most likely to send a voice note instead of texting?",
+  "Who's most likely to make everyone late?",
+  "Who's most likely to eat something off the floor?",
+  "Who's most likely to take the aux and never give it back?",
+  "Who's most likely to cheat at a family board game?",
+  "Who's most likely to fall asleep in the car instantly?",
+  "Who's most likely to reply three weeks later?",
+  "Who's most likely to be the loudest in a quiet room?",
+  "Who's most likely to still use a cracked phone screen?",
+  "Who's most likely to sneeze loud enough to scare everyone?",
+  "Who's most likely to hide the receipt?",
+  "Who's most likely to start a diet and quit by Tuesday?",
+  "Who's most likely to sing badly in the shower?",
+  "Who's most likely to lose the remote every single day?",
+  "Who's most likely to leave the fridge door open?",
+  "Who's most likely to say “one more episode” at 3am?",
+  "Who's most likely to spill on themselves immediately?",
+  "Who's most likely to blame the dog?",
+  "Who's most likely to befriend a stranger anywhere?",
+  "Who's most likely to forget a birthday?",
+  "Who's most likely to get sunburnt in the shade?",
+  "Who's most likely to correct your grammar mid-argument?",
+  "Who's most likely to keep a receipt from 2019?",
+  "Who's most likely to snore and deny it?",
+  "Who's most likely to buy the whole aisle on sale?",
+  "Who's most likely to take 200 photos of one thing?",
+  "Who's most likely to hit snooze nine times?",
+  "Who's most likely to eat dessert first?",
+  "Who's most likely to complain about the music, then dance?",
+  "Who's most likely to be scared by their own reflection?",
+  "Who's most likely to lecture about screen time from their phone?",
+  "Who's most likely to make a scene at a restaurant?",
+  "Who's most likely to laugh at the worst possible moment?",
+  "Who's most likely to microwave fish around other people?",
+  "Who's most likely to say “no offense” then offend everyone?",
+  "Who's most likely to adopt a stray animal today?",
+  "Who's most likely to cry laughing at their own joke?",
+  "Who's most likely to know everyone's business?",
+  "Who's most likely to start drama at a quiet dinner?",
+  "Who's most likely to get caught dancing alone?",
+  "Who's most likely to eat leftovers with a name on them?",
+  "Who's most likely to lose one sock forever?",
+  "Who's most likely to slip on ice?",
+  "Who's most likely to talk in their sleep?",
+  "Who's most likely to like a photo from 2016 by accident?",
+  "Who's most likely to forget their own password?",
+  "Who's most likely to answer a question with a long story?",
+  "Who's most likely to jump at a balloon popping?",
+  "Who's most likely to say “I'm fine” and clearly not be?",
+  "Who's most likely to lose an argument to a child?",
+  "Who's most likely to sleep through every alarm?",
+  "Who's most likely to eat the same meal every day?",
+  "Who's most likely to take forever picking a filter?",
+  "Who's most likely to pay the bill and mention it forever?",
+  "Who's most likely to lose their keys inside the house?"
+];
+
+const IMPOSTOR_QUESTIONS = [
+  "Who's most likely to survive a zombie apocalypse?",
+  "Who's most likely to become a spy?",
+  "Who's most likely to lose a fight to a goose?",
+  "Who's most likely to get arrested in another country?",
+  "Who's most likely to go viral overnight?",
+  "Who's most likely to become rich by accident?",
+  "Who's most likely to join a secret society?",
+  "Who's most likely to escape from prison?",
+  "Who's most likely to be famous in another country?",
+  "Who's most likely to move abroad tomorrow?",
+  "Who's most likely to fight a bear and win?",
+  "Who's most likely to run for president?",
+  "Who's most likely to survive alone in the woods?",
+  "Who's most likely to be a secret black belt?",
+  "Who's most likely to marry a celebrity?",
+  "Who's most likely to go to space?",
+  "Who's most likely to start a cult?",
+  "Who's most likely to win a talent show?",
+  "Who's most likely to rob a bank and get away with it?",
+  "Who's most likely to become a pro wrestler?",
+  "Who's most likely to disappear and never be found?",
+  "Who's most likely to break a world record?",
+  "Who's most likely to lead a revolution?",
+  "Who's most likely to be mistaken for a celebrity?",
+  "Who's most likely to win the lottery?",
+  "Who's most likely to be the getaway driver?",
+  "Who's most likely to thrive on a deserted island?",
+  "Who's most likely to be a secret genius?",
+  "Who's most likely to talk their way out of anything?",
+  "Who's most likely to own a private island?",
+  "Who's most likely to become a stunt double?",
+  "Who's most likely to be recruited by the FBI?",
+  "Who's most likely to win an eating contest?",
+  "Who's most likely to become a famous chef?",
+  "Who's most likely to be knighted?",
+  "Who's most likely to swim with sharks?",
+  "Who's most likely to have been a pirate in a past life?",
+  "Who's most likely to become a pro gamer?",
+  "Who's most likely to invent something world-changing?",
+  "Who's most likely to be a double agent?",
+  "Who's most likely to climb Everest?",
+  "Who's most likely to become a rockstar?",
+  "Who's most likely to survive a horror movie?",
+  "Who's most likely to die first in a horror movie?",
+  "Who's most likely to befriend a wild animal?",
+  "Who's most likely to become a small-town legend?",
+  "Who's most likely to work as a bodyguard?",
+  "Who's most likely to win a staring contest with a bear?",
+  "Who's most likely to break out of handcuffs?",
+  "Who's most likely to hack into something?",
+  "Who's most likely to be crowned royalty somewhere?",
+  "Who's most likely to run a marathon with no training?",
+  "Who's most likely to have a fake identity ready?",
+  "Who's most likely to negotiate with pirates?",
+  "Who's most likely to become a treasure hunter?",
+  "Who's most likely to survive a plane crash?",
+  "Who's most likely to land a plane in an emergency?",
+  "Who's most likely to sail around the world alone?",
+  "Who's most likely to win a sword fight?",
+  "Who's most likely to be a secret millionaire?",
+  "Who's most likely to get banned from a casino?",
+  "Who's most likely to outsmart a detective?",
+  "Who's most likely to lead a rescue mission?",
+  "Who's most likely to tame a wolf?",
+  "Who's most likely to be a ninja?",
+  "Who's most likely to win a high-speed chase?",
+  "Who's most likely to be in witness protection?",
+  "Who's most likely to catch a fish bare-handed?",
+  "Who's most likely to start a fire with no matches?",
+  "Who's most likely to hold a record for something useless?",
+  "Who's most likely to write a book under a fake name?",
+  "Who's most likely to fight a kangaroo?",
+  "Who's most likely to be the last one standing?",
+  "Who's most likely to get stopped at customs?",
+  "Who's most likely to be a con artist?",
+  "Who's most likely to become a superhero?",
+  "Who's most likely to become a supervillain?",
+  "Who's most likely to survive a week without their phone?",
+  "Who's most likely to run a criminal empire?",
+  "Who's most likely to get a statue built of them?",
+  "Who's most likely to run an underground fight club?",
+  "Who's most likely to win a game show?",
+  "Who's most likely to be adopted by a foreign village?",
+  "Who's most likely to survive lost at sea?",
+  "Who's most likely to pick a lock?",
+  "Who's most likely to command a spaceship?",
+  "Who's most likely to become a bounty hunter?",
+  "Who's most likely to fake an accent for a whole year?",
+  "Who's most likely to steal a painting from a museum?",
+  "Who's most likely to become a monk?",
+  "Who's most likely to be a pro poker player?",
+  "Who's most likely to wrestle an alligator?",
+  "Who's most likely to be a war hero?",
+  "Who's most likely to start their own country?",
+  "Who's most likely to become a famous DJ?",
+  "Who's most likely to live to 110?",
+  "Who's most likely to survive a month in the wild?",
+  "Who's most likely to be a secret informant?",
+  "Who's most likely to build a boat and escape?",
+  "Who's most likely to be the chosen one?"
+];
+
+/* card colours, one per player seat */
+const CARD_SKINS = [
+  ['#8B3BF7', '#B84DF0'],
+  ['#FFB020', '#FF7418'],
+  ['#2EA8FF', '#1563E8'],
+  ['#FF5D8F', '#E0197A'],
+  ['#22C58B', '#0B9C6C'],
+  ['#FF6B4A', '#E23434'],
+  ['#5B6BFF', '#3A34D6'],
+  ['#F2C230', '#E08A12']
+];
+
+/* ==================================================================
+   STATE
+   ================================================================== */
+const state = {
+  players: [], impostorCount: 1, impostorIdx: new Set(),
+  crewQ: '', impQ: '', turn: 0, peeked: false,
+  usedCrew: new Set(), usedImp: new Set(),
+  out: new Set(),        // everyone removed from the vote (caught or wrongly ejected)
+  caught: new Set()      // impostors successfully identified
+};
+
+const $ = (id) => document.getElementById(id);
+const skin = (i) => CARD_SKINS[i % CARD_SKINS.length];
+
+function show(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function buzz(p) { if (navigator.vibrate) { try { navigator.vibrate(p); } catch (e) {} } }
+
+/* ==================================================================
+   SETUP
+   ================================================================== */
+let fields = ['', '', '', ''];
+
+/* Impostors must stay a strict minority, otherwise they'd already have
+   won before the first vote is even cast. */
+const maxImpostors = (n) => Math.max(1, Math.min(3, Math.floor((n - 1) / 2)));
+
+function renderPlayers() {
+  const list = $('playerList');
+  list.innerHTML = '';
+
+  fields.forEach((val, i) => {
+    const row = document.createElement('div');
+    row.className = 'prow';
+
+    const dot = document.createElement('span');
+    dot.className = 'pdot';
+    dot.style.background = 'linear-gradient(140deg,' + skin(i)[0] + ',' + skin(i)[1] + ')';
+    dot.textContent = i + 1;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = val;
+    input.maxLength = 14;
+    input.placeholder = 'Player ' + (i + 1);
+    input.autocomplete = 'off';
+    input.autocapitalize = 'words';
+    input.spellcheck = false;
+    input.addEventListener('input', () => { fields[i] = input.value; refreshSetup(); });
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const next = list.querySelectorAll('input')[i + 1];
+      if (next) next.focus(); else addField();
+    });
+
+    const kill = document.createElement('button');
+    kill.className = 'pkill';
+    kill.type = 'button';
+    kill.innerHTML = '&times;';
+    kill.setAttribute('aria-label', 'Remove player ' + (i + 1));
+    kill.disabled = fields.length <= 3;
+    kill.addEventListener('click', () => { fields.splice(i, 1); renderPlayers(); refreshSetup(); });
+
+    row.append(dot, input, kill);
+    list.appendChild(row);
+  });
+}
+
+function addField() {
+  if (fields.length >= 16) return;
+  fields.push('');
+  renderPlayers();
+  refreshSetup();
+  const all = $('playerList').querySelectorAll('input');
+  all[all.length - 1].focus();
+}
+
+const named = () => fields.map(v => v.trim()).filter(Boolean);
+
+function refreshSetup() {
+  const names = named();
+  const n = names.length;
+  const cap = maxImpostors(n);
+  if (state.impostorCount > cap) state.impostorCount = cap;
+
+  $('impostorSeg').querySelectorAll('button').forEach(b => {
+    const v = +b.dataset.n;
+    b.disabled = n < 3 || v > cap;
+    b.classList.toggle('on', v === state.impostorCount && !b.disabled);
+  });
+
+  const dupes = new Set(names.map(s => s.toLowerCase())).size !== n;
+  const note = $('setupNote');
+  let msg = '', bad = false;
+
+  if (n < 3)        { msg = 'Add at least 3 names to start.'; bad = true; }
+  else if (dupes)   { msg = 'Two players share a name — add a nickname.'; bad = true; }
+  else if (cap < 3) { msg = 'With ' + n + ' players you can have up to ' + cap + '.'; }
+  else              { msg = 'More impostors = more chaos.'; }
+
+  note.textContent = msg;
+  note.classList.toggle('bad', bad);
+  $('startBtn').disabled = (n < 3 || dupes);
+}
+
+$('addPlayer').addEventListener('click', addField);
+
+$('impostorSeg').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b || b.disabled) return;
+  state.impostorCount = +b.dataset.n;
+  buzz(8);
+  refreshSetup();
+});
+
+$('startBtn').addEventListener('click', () => { state.players = named(); startRound(); });
+
+/* ==================================================================
+   ROUND ENGINE — decoupled draw
+   ================================================================== */
+function drawFrom(pool, used) {
+  if (used.size >= pool.length) used.clear();
+  let i;
+  do { i = Math.floor(Math.random() * pool.length); } while (used.has(i));
+  used.add(i);
+  return pool[i];
+}
+
+function pickImpostors(total, count) {
+  const idx = [...Array(total).keys()];
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  return new Set(idx.slice(0, count));
+}
+
+function startRound() {
+  state.impostorCount = Math.min(state.impostorCount, maxImpostors(state.players.length));
+  state.impostorIdx = pickImpostors(state.players.length, state.impostorCount);
+  state.crewQ = drawFrom(CREWMATE_QUESTIONS, state.usedCrew);
+  state.impQ  = drawFrom(IMPOSTOR_QUESTIONS, state.usedImp);
+  state.turn = 0;
+  state.out = new Set();
+  state.caught = new Set();
+  renderTurn();
+  show('pass');
+}
+
+function renderTurn() {
+  const i = state.turn;
+  const name = state.players[i];
+
+  $('passName').textContent = name;
+  $('coverName').textContent = name;
+  $('coverFace').textContent = name.charAt(0).toUpperCase();
+  $('cover').style.background = 'linear-gradient(160deg,' + skin(i)[0] + ' 0%,' + skin(i)[1] + ' 100%)';
+  $('counter').textContent = (i + 1) + ' / ' + state.players.length;
+
+  /* identical layout for everyone — nothing gives the impostor away */
+  $('secretQ').textContent = state.impostorIdx.has(i) ? state.impQ : state.crewQ;
+
+  state.peeked = false;
+  $('nextPlayerBtn').disabled = true;
+  $('nextPlayerBtn').textContent = (i === state.players.length - 1) ? "THAT'S EVERYONE" : 'NEXT PLAYER';
+  hideSecret();
+}
+
+$('nextPlayerBtn').addEventListener('click', () => {
+  hideSecret();
+  state.turn++;
+  if (state.turn >= state.players.length) show('ready');
+  else renderTurn();
+});
+
+$('quitBtn').addEventListener('click', () => show('setup'));
+$('voteQuit').addEventListener('click', () => show('setup'));
+
+/* ==================================================================
+   CARD GESTURE
+   ================================================================== */
+const stage = $('stage');
+const cover = $('cover');
+let holding = false, startY = 0;
+const MAX_LIFT = 170;
+
+function showSecret() {
+  stage.classList.add('open');
+  if (!state.peeked) {
+    state.peeked = true;
+    $('nextPlayerBtn').disabled = false;
+    buzz(14);
+  }
+}
+function hideSecret() {
+  stage.classList.remove('open');
+  cover.classList.remove('dragging');
+  cover.style.transform = '';
+}
+function gStart(y) {
+  holding = true; startY = y;
+  cover.classList.add('dragging');
+  cover.style.transform = 'translateY(-120px)';
+  showSecret();
+}
+function gMove(y) {
+  if (!holding) return;
+  const dy = y - startY;
+  cover.style.transform = 'translateY(' + Math.max(-MAX_LIFT, Math.min(-60, -120 + dy * 0.6)) + 'px)';
+}
+function gEnd() { if (!holding) return; holding = false; hideSecret(); }
+
+cover.addEventListener('touchstart', (e) => { e.preventDefault(); gStart(e.touches[0].clientY); }, { passive: false });
+cover.addEventListener('touchmove',  (e) => { e.preventDefault(); gMove(e.touches[0].clientY);  }, { passive: false });
+cover.addEventListener('touchend', gEnd);
+cover.addEventListener('touchcancel', gEnd);
+
+cover.addEventListener('mousedown', (e) => { e.preventDefault(); gStart(e.clientY); });
+window.addEventListener('mousemove', (e) => gMove(e.clientY));
+window.addEventListener('mouseup', gEnd);
+cover.addEventListener('mouseleave', gEnd);
+
+cover.tabIndex = 0;
+cover.addEventListener('keydown', (e) => { if ((e.key === ' ' || e.key === 'Enter') && !holding) { e.preventDefault(); gStart(0); } });
+cover.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') gEnd(); });
+cover.addEventListener('blur', gEnd);
+
+document.addEventListener('touchmove', (e) => { if (holding) e.preventDefault(); }, { passive: false });
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+
+/* ==================================================================
+   REVEAL + REPLAY
+   ================================================================== */
+/* No question is revealed here — the whole point is that even the
+   impostors don't know they're impostors while they defend themselves.
+   Both questions stay secret until the vote is over. */
+$('revealBtn').addEventListener('click', () => {
+  const c = state.impostorCount;
+  $('impChip').textContent = c === 1 ? '1 impostor among you' : c + ' impostors among you';
+  buzz([18, 60, 18]);
+  show('reveal');
+});
+
+/* ==================================================================
+   VOTING PHASE
+   Crew wins by naming every impostor. A wrong accusation ejects an
+   innocent player, shrinking the crew. The moment the impostors are
+   no longer outnumbered, they've won.
+   ================================================================== */
+const alive        = () => state.players.map((_, i) => i).filter(i => !state.out.has(i));
+const impsLeft     = () => alive().filter(i => state.impostorIdx.has(i)).length;
+const crewLeft     = () => alive().filter(i => !state.impostorIdx.has(i)).length;
+const impostorNames = () => state.players.filter((_, i) => state.impostorIdx.has(i));
+
+$('toVoteBtn').addEventListener('click', () => {
+  $('voteMsg').style.display = 'none';
+  renderVote();
+  show('vote');
+});
+
+function renderVote() {
+  const grid = $('voteGrid');
+  grid.innerHTML = '';
+
+  alive().forEach(i => {
+    const b = document.createElement('button');
+    b.className = 'vote-btn';
+    b.type = 'button';
+    b.dataset.i = i;
+
+    const av = document.createElement('span');
+    av.className = 'av';
+    av.style.background = 'linear-gradient(140deg,' + skin(i)[0] + ',' + skin(i)[1] + ')';
+    av.textContent = state.players[i].charAt(0).toUpperCase();
+
+    const nm = document.createElement('span');
+    nm.className = 'nm';
+    nm.textContent = state.players[i];
+
+    b.append(av, nm);
+    b.addEventListener('click', () => castVote(i));
+    grid.appendChild(b);
+  });
+
+  const il = impsLeft();
+  const spare = crewLeft() - il;                 // wrong guesses still survivable
+  $('voteLeft').textContent = il === 1 ? '1 impostor left' : il + ' impostors left';
+  $('voteHint').textContent = spare === 1
+    ? 'One wrong guess and the impostors win.'
+    : spare + ' wrong guesses left before the impostors win.';
+}
+
+function castVote(i) {
+  const name = state.players[i];
+  state.out.add(i);
+
+  const msg = $('voteMsg');
+  msg.style.display = '';
+
+  if (state.impostorIdx.has(i)) {
+    state.caught.add(i);
+    buzz([20, 50, 20]);
+    if (state.caught.size === state.impostorCount) return finish('crew');
+    msg.className = 'msg right';
+    msg.textContent = 'Correct — ' + name + ' was an impostor! ' +
+      (impsLeft() === 1 ? 'One more to find.' : impsLeft() + ' still hiding.');
+  } else {
+    buzz(60);
+    if (impsLeft() >= crewLeft()) return finish('imp');
+    msg.className = 'msg wrong';
+    msg.textContent = 'Wrong — ' + name + ' was innocent. Guess again.';
+  }
+
+  renderVote();
+}
+
+/* ==================================================================
+   RESULT
+   ================================================================== */
+function fact(label, text, hot) {
+  const d = document.createElement('div');
+  d.className = 'spoiler';
+  const l = document.createElement('span'); l.className = 'lbl'; l.textContent = label;
+  const v = document.createElement('span'); v.className = 'val' + (hot ? ' hot' : ''); v.textContent = text;
+  d.append(l, v);
+  $('resultFacts').appendChild(d);
+}
+
+function finish(outcome) {
+  const names = impostorNames();
+  const many = names.length > 1;
+  const banner = $('resultBanner');
+  const line = $('resultLine');
+
+  if (outcome === 'crew') {
+    banner.className = 'banner win';
+    banner.textContent = 'CREW WINS';
+    line.textContent = many
+      ? 'Every impostor was caught. Nobody faked it well enough.'
+      : 'You caught the impostor. Their story never quite added up.';
+  } else if (outcome === 'imp') {
+    banner.className = 'banner lose';
+    banner.textContent = many ? 'IMPOSTORS WIN' : 'IMPOSTOR WINS';
+    line.textContent = many
+      ? 'They talked their way out of it and took the room down with them.'
+      : 'They bluffed their way through and got away with it completely.';
+  } else {
+    banner.className = 'banner flat';
+    banner.textContent = 'THE ANSWER';
+    line.textContent = 'No vote taken — here is who was faking it.';
+  }
+
+  $('resultFacts').innerHTML = '';
+  fact(many ? 'The impostors' : 'The impostor', names.join('  ·  '), true);
+  fact('They were secretly answering', state.impQ, false);
+  fact('Everyone else answered', state.crewQ, false);
+
+  show('result');
+}
+
+$('skipVoteBtn').addEventListener('click', () => finish('skip'));
+
+$('playAgainBtn').addEventListener('click', startRound);
+
+$('editPlayersBtn').addEventListener('click', () => {
+  fields = state.players.length ? state.players.slice() : fields;
+  renderPlayers(); refreshSetup(); show('setup');
+});
+
+/* ==================================================================
+   HELP MODAL
+   ================================================================== */
+const modal = $('howModal');
+const openHow  = () => modal.classList.add('open');
+const closeHow = () => modal.classList.remove('open');
+$('howBtn').addEventListener('click', openHow);
+$('helpBtn2').addEventListener('click', openHow);
+$('helpBtn3').addEventListener('click', openHow);
+$('closeHow').addEventListener('click', closeHow);
+modal.addEventListener('click', (e) => { if (e.target === modal) closeHow(); });
+
+/* ==================================================================
+   BOOT
+   ================================================================== */
+renderPlayers();
+refreshSetup();
+window.__game = state;
+</script>
+
+<!--
+====================================================================
+ DEPLOY TO GITHUB PAGES  —  step-by-step terminal commands
+====================================================================
+
+ Result: a public URL like  https://YOURUSERNAME.github.io/most-likely-to/
+
+--------------------------------------------------------------------
+ STEP 0 — one-time git setup (skip if already configured)
+--------------------------------------------------------------------
+
+   git --version
+   git config --global user.name  "Your Name"
+   git config --global user.email "you@example.com"
+
+--------------------------------------------------------------------
+ STEP 1 — make a folder and turn it into a repo
+--------------------------------------------------------------------
+
+   mkdir most-likely-to
+   cd most-likely-to
+   # copy index.html into this folder now
+   git init
+   git add index.html
+   git commit -m "Most Likely To - Impostor Edition"
+   git branch -M main
+
+--------------------------------------------------------------------
+ STEP 2 — create the GitHub repo and push
+--------------------------------------------------------------------
+
+ OPTION A — GitHub CLI (easiest):
+
+   gh auth login
+   gh repo create most-likely-to --public --source=. --remote=origin --push
+
+ OPTION B — no CLI:
+   Go to https://github.com/new , name it  most-likely-to , set Public,
+   do NOT add a README, click Create repository. Then:
+
+   git remote add origin https://github.com/YOURUSERNAME/most-likely-to.git
+   git push -u origin main
+
+--------------------------------------------------------------------
+ STEP 3 — switch on GitHub Pages
+--------------------------------------------------------------------
+
+ OPTION A — GitHub CLI:
+
+   gh api -X POST repos/YOURUSERNAME/most-likely-to/pages \
+     -f "source[branch]=main" -f "source[path]=/"
+
+ OPTION B — browser:
+   Repo -> Settings -> Pages -> Build and deployment
+   Source: Deploy from a branch    Branch: main    Folder: / (root)   -> Save
+
+--------------------------------------------------------------------
+ STEP 4 — wait ~60 seconds, then open
+--------------------------------------------------------------------
+
+   https://YOURUSERNAME.github.io/most-likely-to/
+
+ On your phone: Share -> Add to Home Screen. It opens full-screen like an app.
+
+--------------------------------------------------------------------
+ STEP 5 — pushing changes later
+--------------------------------------------------------------------
+
+   git add index.html
+   git commit -m "New questions"
+   git push
+
+ Pages redeploys within a minute. Hard-refresh if you don't see it:
+ Ctrl+Shift+R  (Cmd+Shift+R on Mac).
+
+====================================================================
+-->
+</body>
+</html>
