@@ -516,16 +516,16 @@ h1.title {
     <p class="q">Has everyone written down their answers?</p>
     <p class="why">No peeking. No changing your mind. There's no going back after this.</p>
   </div>
-  <button class="btn primary" id="revealBtn" style="margin-top:14px;">EVERYONE'S READY</button>
+  <button class="btn primary" id="revealBtn" style="margin-top:14px;">REVEAL QUESTION</button>
 </section>
 
 <!-- ============================ REVEAL ========================== -->
 <section class="screen" id="screen-reveal">
   <div class="sheet big-sheet">
-    <span class="lbl">Nobody finds out anything yet</span>
-    <p class="q">Go around the room.</p>
+    <span class="lbl">The real question was</span>
+    <p class="q" id="realQ">—</p>
     <span class="chip" id="impChip">1 impostor among you</span>
-    <p class="why" id="defenseWhy">Say the name you wrote down and <strong>why</strong> you picked them. Do not read your question out loud.</p>
+    <p class="why" id="defenseWhy">Everyone say who you picked — and why.</p>
   </div>
 
   <button class="btn primary" id="toVoteBtn" style="margin-top:14px;">START THE VOTE</button>
@@ -573,12 +573,12 @@ h1.title {
     <ol>
       <li>Everyone gets the <b>same question</b> on the phone — except the impostors, who secretly get a <b>totally different one</b>.</li>
       <li>Each player holds the card to peek, then <b>writes down the name</b> of whoever fits their question best.</li>
-      <li>Nobody knows if they're the impostor. Everyone thinks their question is the real one — and it stays that way.</li>
-      <li>Go around the room. Say the name you wrote down and <b>why</b> — but never read your question out loud.</li>
-      <li>The impostors aren't lying, they're answering honestly. That's what makes them sound so strange.</li>
+      <li>Nobody knows if they're the impostor. Everyone thinks their question is the real one.</li>
+      <li>When everyone has answered, the <b>real question is revealed</b> to the room — and the impostors realise theirs was different.</li>
+      <li>Go around and say who you picked and <b>why</b>. The impostors now have to justify an answer to a question they never saw.</li>
       <li>Then <b>vote</b>. Name an impostor and they're caught. Name an innocent and they're <b>out of the game</b> — and you guess again from whoever's left.</li>
       <li>Catch every impostor and the <b>crew wins</b>. Eject too many innocents and the <b>impostors win</b>.</li>
-      <li>Only then are <b>both questions revealed</b> — including the one the impostor was innocently answering the whole time.</li>
+      <li>At the end you find out <b>what the impostors were actually answering</b>.</li>
     </ol>
     <button class="btn primary" id="closeHow">Got it</button>
   </div>
@@ -1047,12 +1047,15 @@ document.addEventListener('gesturestart', (e) => e.preventDefault());
 /* ==================================================================
    REVEAL + REPLAY
    ================================================================== */
-/* No question is revealed here — the whole point is that even the
-   impostors don't know they're impostors while they defend themselves.
-   Both questions stay secret until the vote is over. */
+/* The crewmate question goes up on screen for the whole room. This is the
+   moment the impostors realise their prompt was different — and now they
+   have to justify an answer to a question they never saw. */
 $('revealBtn').addEventListener('click', () => {
   const c = state.impostorCount;
+  $('realQ').textContent = state.crewQ;
   $('impChip').textContent = c === 1 ? '1 impostor among you' : c + ' impostors among you';
+  $('defenseWhy').innerHTML = 'Everyone say who you picked — and <strong>why</strong>. ' +
+    (c === 1 ? 'One of you' : c + ' of you') + ' just found out they were answering something else entirely.';
   buzz([18, 60, 18]);
   show('reveal');
 });
